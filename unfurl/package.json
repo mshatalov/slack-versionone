@@ -1,0 +1,13 @@
+{
+  "name": "slack-v1-unfurl",
+  "version": "1.0.0",
+  "description": "Basic Slack and V1 integration - Unfurl action handler",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "author": "Mikhail Shatalov",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {}
+}

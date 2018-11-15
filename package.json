@@ -1,0 +1,21 @@
+{
+  "name": "slack-v1",
+  "version": "1.0.0",
+  "description": "Basic Slack and V1 integration",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "author": "Mikhail Shatalov",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/pubsub": "^0.20.1",
+    "slack-v1-callback": "file:./callback",
+    "slack-v1-unfurl": "file:./unfurl"
+  },
+  "devDependencies": {
+    "ava": "1.0.0-rc.1",
+    "proxyquire": "^2.1.0",
+    "sinon": "^7.1.1"
+  }
+}
