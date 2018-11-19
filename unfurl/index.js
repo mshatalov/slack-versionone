@@ -32,7 +32,7 @@ function getV1ObjectFromURL(url) {
 
 function getV1Object(type, id) {
     return new Promise((resolve, reject) => {
-        const url = URL.parse(config.V1_URL_BASE + "/rest-1.v1/Data/" + type + "/" + id + "?Accept=application/json", true);
+        const url = URL.parse(config.V1_URL_BASE + "/rest-1.v1/Data/" + type + "/" + id + "?Accept=application/json&sel=Name,Number", true);
         url.auth = `${config.V1_USER}:${config.V1_PASSWORD}`;
 
         let data = "";
