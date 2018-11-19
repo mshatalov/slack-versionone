@@ -84,7 +84,7 @@ function postSlackUnfurlMessage(message) {
             res.on("end", () => {
                 var parsedData = JSON.parse(data);
                 if (parsedData === null || parsedData.ok !== true) {
-                    return reject(`Slack API responded with non-OK, response: ${parsedData} (raw: ${data})`);
+                    return reject(new Error(`Slack API responded with non-OK, response: ${parsedData} (raw: ${data})`));
                 }
                 resolve();
             });
@@ -107,7 +107,8 @@ function unfurl(data, context) {
     const ts = data.attributes.ts;
     const channel = data.attributes.channel;
     console.log(`Processing ${messageId} for ${link} in ${channel} at ${ts}`)
-    return getV1ObjectFromURL(link)
+    return Promise.resolve()
+        .then(() => getV1ObjectFromURL(link))
         .then(v1Asset => {
             let unfurl = {};
             unfurl[link] = convertV1AssetToUnfurl(v1Asset);
@@ -119,10 +120,9 @@ function unfurl(data, context) {
                 });
             }
             else {
-                console.error(`Could not extract details for ${link}`);
+                throw new Error(`Could not extract details for ${link}`);
             }
-        })
-        .catch(console.error);
+        });
 }
 
 exports.unfurl = unfurl;
