@@ -64,7 +64,7 @@ test("Slack token is verified on each request", async t => {
     t.true(res.status.calledWith(401));
 });
 
-test("Empty links list generates no PubSub messages, but responds with 200 OK", async t => {
+test("Empty links list generates no PubSub messages, but responds with 200", async t => {
     const req = {
         method: "POST",
         body: {
@@ -82,7 +82,7 @@ test("Empty links list generates no PubSub messages, but responds with 200 OK", 
     t.true(res.status.calledWith(200));
 });
 
-test("Link shared event generates corresponding PubSub messages", async t => {
+test("link_shared event generates corresponding PubSub messages", async t => {
     const req = {
         method: "POST",
         body: {
