@@ -4,6 +4,8 @@
   "description": "Basic Slack and V1 integration",
   "main": "index.js",
   "scripts": {
+    "lint": "semistandard",
+    "pretest": "npm run lint",
     "test": "ava"
   },
   "author": "Mikhail Shatalov",
@@ -17,6 +19,7 @@
     "ava": "1.0.0-rc.1",
     "nock": "^10.0.2",
     "proxyquire": "^2.1.0",
+    "semistandard": "^13.0.1",
     "sinon": "^7.1.1"
   }
 }
