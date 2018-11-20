@@ -36,15 +36,17 @@ async function getV1Object (type, id) {
   return data.body;
 }
 
-function parseV1Object (obj) {
+function v1ObjectToUnfurl (url, obj) {
   const attr = obj && obj.Attributes;
   if (attr && attr.Number && attr.Name) {
-    return {
+    const unfurl = {};
+    unfurl[url] = {
       title: attr.Number.value,
       text: attr.Name.value
     };
+    return unfurl;
   }
-  return null;
+  throw new Error(`Could not extract details for ${url}`);
 }
 
 function postSlackUnfurlMessage (message) {
@@ -62,9 +64,9 @@ function postSlackUnfurlMessage (message) {
     });
 }
 
-function unfurl (data, context) {
+exports.unfurl = (data, context) => {
   const messageId = context.eventId;
-  const link = data.data ? Buffer.from(data.data, 'base64').toString() : null;
+  const link = (data.data && Buffer.from(data.data, 'base64').toString()) || null;
   if (link === null) {
     console.error(`Message ${messageId} has no data`);
     return;
@@ -75,19 +77,9 @@ function unfurl (data, context) {
   console.log(`Processing ${messageId} for ${link} in ${channel} at ${ts}`);
   return Promise.resolve()
     .then(() => getV1ObjectFromURL(link))
-    .then(v1Asset => {
-      let unfurl = {};
-      unfurl[link] = parseV1Object(v1Asset);
-      if (unfurl[link] !== null) {
-        return postSlackUnfurlMessage({
-          channel: channel,
-          ts: ts,
-          unfurls: unfurl
-        });
-      } else {
-        throw new Error(`Could not extract details for ${link}`);
-      }
-    });
-}
-
-exports.unfurl = unfurl;
+    .then(obj => postSlackUnfurlMessage({
+      channel: channel,
+      ts: ts,
+      unfurls: v1ObjectToUnfurl(link, obj)
+    }));
+};
