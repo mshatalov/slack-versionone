@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "semistandard",
     "pretest": "npm run lint",
-    "test": "ava"
+    "test": "ava -v"
   },
   "author": "Mikhail Shatalov",
   "license": "ISC",
