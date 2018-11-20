@@ -134,3 +134,8 @@ test.serial('Only Story and Defect asset types supported, case sensitive', async
   const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidToken=story%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /story/ });
 });
+
+test.serial('Invalid URL base is ignored', async t => {
+  const url = `${config.V1_URL_BASE.slice(0, -2)}/story.mvc/Summary?oidToken=Epic%3A11111`;
+  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /ignored/ });
+});
