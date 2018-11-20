@@ -9,9 +9,7 @@ function getV1ObjectFromURL (url) {
     throw new Error(`URL ${url} ignored`);
   }
 
-  let parsedUrl = URL.parse(url, true);
-  let oid = parsedUrl.query['oidToken'];
-
+  const oid = URL.parse(url, true).query['oidToken'];
   if (oid == null) {
     throw new Error(`Could not extract V1 oidToken, ignoring ${url}`);
   }
@@ -38,18 +36,15 @@ async function getV1Object (type, id) {
   return data.body;
 }
 
-function convertV1AssetToUnfurl (asset) {
-  if (asset === null || asset.Attributes === null) {
-    return null;
+function parseV1Object (obj) {
+  const attr = obj && obj.Attributes;
+  if (attr && attr.Number && attr.Name) {
+    return {
+      title: attr.Number.value,
+      text: attr.Name.value
+    };
   }
-
-  var attrs = asset.Attributes;
-  return attrs.Number || attrs.Name
-    ? {
-      title: attrs.Number != null ? attrs.Number.value : null,
-      text: attrs.Name != null ? attrs.Name.value : null
-    }
-    : null;
+  return null;
 }
 
 function postSlackUnfurlMessage (message) {
@@ -82,7 +77,7 @@ function unfurl (data, context) {
     .then(() => getV1ObjectFromURL(link))
     .then(v1Asset => {
       let unfurl = {};
-      unfurl[link] = convertV1AssetToUnfurl(v1Asset);
+      unfurl[link] = parseV1Object(v1Asset);
       if (unfurl[link] !== null) {
         return postSlackUnfurlMessage({
           channel: channel,

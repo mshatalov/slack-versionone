@@ -125,6 +125,22 @@ test.serial('Reports error if Slack return ok: false', async t => {
   await t.throwsAsync(invokeUnfurl(url, 'mock-ts', 'mock-ch'), { instanceOf: Error, message: /non-OK/ });
 });
 
+test.serial('Reports error if V1 object is missing title', async t => {
+  const path = './replies/v1-story-77777.json';
+  const url = makeV1URL('Story', 77777);
+  mockV1('Story', 77777, 200, path);
+
+  await t.throwsAsync(invokeUnfurl(url, 'mock-ts', 'mock-ch'), { instanceOf: Error, message: `Could not extract details for ${url}` });
+});
+
+test.serial('Reports error if V1 object is missing number', async t => {
+  const path = './replies/v1-story-77778.json';
+  const url = makeV1URL('Story', 77778);
+  mockV1('Story', 77778, 200, path);
+
+  await t.throwsAsync(invokeUnfurl(url, 'mock-ts', 'mock-ch'), { instanceOf: Error, message: `Could not extract details for ${url}` });
+});
+
 test.serial('Only Story and Defect asset types supported', async t => {
   const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidToken=Epic%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /Epic/ });
