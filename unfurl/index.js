@@ -46,7 +46,7 @@ function getV1Object (type, id) {
   });
 }
 
-function convertV1AssetToUnfurl (asset) {
+function convertV1AssetToUnfurl (asset, link) {
   if (asset === null || asset.Attributes === null) {
     return null;
   }
@@ -55,7 +55,8 @@ function convertV1AssetToUnfurl (asset) {
   return attrs.Number || attrs.Name
     ? {
       title: attrs.Number != null ? attrs.Number.value : null,
-      text: attrs.Name != null ? attrs.Name.value : null
+      text: attrs.Name != null ? attrs.Name.value : null,
+      title_link: link
     }
     : null;
 }
@@ -110,7 +111,7 @@ function unfurl (data, context) {
     .then(() => getV1ObjectFromURL(link))
     .then(v1Asset => {
       let unfurl = {};
-      unfurl[link] = convertV1AssetToUnfurl(v1Asset);
+      unfurl[link] = convertV1AssetToUnfurl(v1Asset, link);
       if (unfurl[link] !== null) {
         return postSlackUnfurlMessage({
           channel: channel,
