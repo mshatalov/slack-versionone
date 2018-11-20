@@ -1,7 +1,7 @@
 'use strict';
 
 const config = require('./config');
-const https = require('https');
+const tiny = require('tiny-json-http');
 const URL = require('url');
 
 function getV1ObjectFromURL (url) {
@@ -29,21 +29,13 @@ function getV1ObjectFromURL (url) {
   return getV1Object(type, oidParts[1]);
 }
 
-function getV1Object (type, id) {
-  return new Promise((resolve, reject) => {
-    const url = URL.parse(config.V1_URL_BASE + '/rest-1.v1/Data/' + type + '/' + id + '?Accept=application/json&sel=Name,Number', true);
-    url.auth = `${config.V1_USER}:${config.V1_PASSWORD}`;
-
-    let data = '';
-    https.get(url, (res) => {
-      if (res.statusCode !== 200) {
-        res.resume();
-        return reject(new Error(`V1 responded with ${res.statusCode} HTTP code`));
-      }
-      res.on('data', chunk => { data += chunk; });
-      res.on('end', () => resolve(JSON.parse(data)));
-    }).on('error', reject);
+async function getV1Object (type, id) {
+  const headers = { 'Authorization': 'Basic ' + Buffer.from(`${config.V1_USER}:${config.V1_PASSWORD}`).toString('base64') };
+  const data = await tiny.get({
+    url: config.V1_URL_BASE + '/rest-1.v1/Data/' + type + '/' + id + '?Accept=application/json&sel=Name,Number',
+    headers
   });
+  return data.body;
 }
 
 function convertV1AssetToUnfurl (asset) {
@@ -61,38 +53,18 @@ function convertV1AssetToUnfurl (asset) {
 }
 
 function postSlackUnfurlMessage (message) {
-  const postData = JSON.stringify(message);
-  return new Promise((resolve, reject) => {
-    let data = '';
-    const request = https.request({
-      hostname: 'slack.com',
-      path: '/api/chat.unfurl',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Content-Length': Buffer.byteLength(postData),
-        'Authorization': `Bearer ${config.SLACK_OAUTH_TOKEN}`
+  const headers = { Authorization: `Bearer ${config.SLACK_OAUTH_TOKEN}` };
+  return tiny
+    .post({
+      url: 'https://slack.com/api/chat.unfurl',
+      headers,
+      data: message
+    })
+    .then(res => {
+      if (res.body.ok !== true) {
+        throw new Error(`Slack API responded with non-OK, response: ${res.body}`);
       }
-    }, (res) => {
-      if (res.statusCode !== 200) {
-        res.resume();
-        return reject(new Error(`Failed to post Slack message: got ${res.statusCode} HTTP code`));
-      }
-
-      res.on('data', chunk => { data += chunk; });
-      res.on('end', () => {
-        var parsedData = JSON.parse(data);
-        if (parsedData === null || parsedData.ok !== true) {
-          return reject(new Error(`Slack API responded with non-OK, response: ${parsedData} (raw: ${data})`));
-        }
-        resolve();
-      });
     });
-    request.on('error', reject);
-
-    request.write(postData);
-    request.end();
-  });
 }
 
 function unfurl (data, context) {

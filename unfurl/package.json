@@ -8,6 +8,8 @@
   },
   "author": "Mikhail Shatalov",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "tiny-json-http": "^7.0.2"
+  },
   "devDependencies": {}
 }

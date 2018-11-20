@@ -103,7 +103,7 @@ test.serial('Reports error if V1 returns non-200', async t => {
   const code = 401;
   await t.throwsAsync(
     testSuccessfulUnfurl(t, 'Story', 55555, './replies/v1-story-55555.json', code),
-    { instanceOf: Error, message: `V1 responded with ${code} HTTP code` }
+    { instanceOf: Error, message: new RegExp(code) }
   );
 });
 
