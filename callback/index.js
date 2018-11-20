@@ -25,7 +25,7 @@ function routeSlackCallback (req, res) {
   var type = req.body != null ? req.body.type : null;
 
   if (type === null || callbackHandlers[type] === null) {
-    const error = new Error(`Callback of \"${type}"\" type is not supported`);
+    const error = new Error(`Callback of "${type}" type is not supported`);
     error.code = 400;
     throw error;
   }
@@ -35,10 +35,10 @@ function routeSlackCallback (req, res) {
 
 function handleEventCallback (req, res) {
   const event = req.body.event;
-  const type = event !== null && event.type || null;
+  const type = (event !== null && event.type) || null;
 
   if (type === null || eventHandlers[type] === null) {
-    const error = new Error(`Event type \"${type}"\" is not supported`);
+    const error = new Error(`Event type "${type}" is not supported`);
     error.code = 400;
     throw error;
   }

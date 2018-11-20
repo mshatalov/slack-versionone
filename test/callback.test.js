@@ -9,7 +9,6 @@ const config = {
 Object.assign(process.env, config);
 
 const callback = require('../callback');
-const PubSub = require('@google-cloud/pubsub');
 
 function stubResponse () {
   return {

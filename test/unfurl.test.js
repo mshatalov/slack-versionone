@@ -54,7 +54,7 @@ function makeV1URL (type, id) {
 
 function invokeUnfurl (url, ts, channel, messageId) {
   return unfurl.unfurl({
-    data: new Buffer(url).toString('base64'),
+    data: Buffer.from(url).toString('base64'),
     attributes: {
       ts: ts,
       channel: channel

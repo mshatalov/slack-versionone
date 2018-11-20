@@ -22,7 +22,7 @@ function getV1ObjectFromURL (url) {
   }
 
   let type = oidParts[0];
-  if (type != 'Story' && type != 'Defect') {
+  if (type !== 'Story' && type !== 'Defect') {
     throw new Error('Asset type ' + type + ' ignored (' + url + ')');
   }
 
@@ -36,7 +36,7 @@ function getV1Object (type, id) {
 
     let data = '';
     https.get(url, (res) => {
-      if (res.statusCode != 200) {
+      if (res.statusCode !== 200) {
         res.resume();
         return reject(new Error(`V1 responded with ${res.statusCode} HTTP code`));
       }
@@ -74,7 +74,7 @@ function postSlackUnfurlMessage (message) {
         'Authorization': `Bearer ${config.SLACK_OAUTH_TOKEN}`
       }
     }, (res) => {
-      if (res.statusCode != 200) {
+      if (res.statusCode !== 200) {
         res.resume();
         return reject(new Error(`Failed to post Slack message: got ${res.statusCode} HTTP code`));
       }
