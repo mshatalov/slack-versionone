@@ -143,15 +143,26 @@ test.serial('Reports error if V1 object is missing number', async t => {
 
 test.serial('Only Story and Defect asset types supported', async t => {
   const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidToken=Epic%3A11111`;
-  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /Epic/ });
+  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: new RegExp('Asset type Epic ignored') });
 });
 
 test.serial('Only Story and Defect asset types supported, case sensitive', async t => {
   const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidToken=story%3A11111`;
-  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /story/ });
+  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: new RegExp('Asset type story ignored') });
+});
+
+test.serial('Reports error if oidToken parameter is missing', async t => {
+  const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidTokenAlt=story%3A11111`;
+  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: `Could not extract V1 oidToken, ignoring ${url}` });
 });
 
 test.serial('Invalid URL base is ignored', async t => {
   const url = `${config.V1_URL_BASE.slice(0, -2)}/story.mvc/Summary?oidToken=Epic%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /ignored/ });
+});
+
+test.serial('PubSub message with no data is ignored', t => {
+  unfurl.unfurl({}, { eventId: 'message-id-no-data' });
+  t.true(console.error.called);
+  t.is(console.error.args[0][0], 'Message message-id-no-data has no data');
 });
