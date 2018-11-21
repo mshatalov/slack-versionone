@@ -10,7 +10,7 @@ function getV1ObjectFromURL (url) {
   }
 
   const oid = URL.parse(url, true).query['oidToken'];
-  if (oid == null) {
+  if (!oid) {
     throw new Error(`Could not extract V1 oidToken, ignoring ${url}`);
   }
 
@@ -66,8 +66,8 @@ function postSlackUnfurlMessage (message) {
 
 exports.unfurl = (data, context) => {
   const messageId = context.eventId;
-  const link = (data.data && Buffer.from(data.data, 'base64').toString()) || null;
-  if (link === null) {
+  const link = (data.data && Buffer.from(data.data, 'base64').toString());
+  if (!link) {
     console.error(`Message ${messageId} has no data`);
     return;
   }
