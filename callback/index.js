@@ -5,61 +5,36 @@ const PubSub = require('@google-cloud/pubsub');
 
 const pubsub = new PubSub();
 
-function verifyHttpMethod (req) {
-  if (!req || req.method !== 'POST') {
-    const error = new Error('POST expected');
-    error.code = 405;
+function verify (value, expected, errorMessage, errorCode) {
+  if (value !== expected) {
+    const error = new Error(errorMessage);
+    error.code = errorCode;
     throw error;
   }
 }
 
-function verifySlackToken (body) {
-  if (!body || body.token !== config.SLACK_TOKEN) {
-    const error = new Error('Invalid credentials');
-    error.code = 401;
-    throw error;
-  }
-}
-
-function routeSlackCallback (req, res) {
-  var type = req.body != null ? req.body.type : null;
-
-  if (type === null || callbackHandlers[type] === null) {
-    const error = new Error(`Callback of "${type}" type is not supported`);
+function route (key, handlers) {
+  if (!(handlers && key && handlers[key])) {
+    const error = new Error(`"${key}" is not supported`);
     error.code = 400;
     throw error;
   }
-
-  return callbackHandlers[type](req, res);
-}
-
-function handleEventCallback (req, res) {
-  const event = req.body.event;
-  const type = (event !== null && event.type) || null;
-
-  if (type === null || eventHandlers[type] === null) {
-    const error = new Error(`Event type "${type}" is not supported`);
-    error.code = 400;
-    throw error;
-  }
-
-  return eventHandlers[type](req, res);
+  return handlers[key];
 }
 
 async function handleLinkShared (req, res) {
-  const body = req.body;
-  const event = body.event;
-  const links = event.links;
-  if (links !== null) {
-    console.log('Processing links ' + links.map(l => l.url));
-    await Promise.all(links.map(l => postUnfurlMessage(l.url, event.message_ts, event.channel)));
+  const event = req.body.event;
+  const links = event && event.links;
+  if (links) {
+    console.log('Processing links ' + links.map(link => link.url));
+    await Promise.all(links.map(link => postUnfurlMessage(link.url, event.message_ts, event.channel)));
   } else {
     console.log('No links to process');
   }
   res.status(200).send('OK');
 }
 
-async function postUnfurlMessage (link, ts, channel) {
+function postUnfurlMessage (link, ts, channel) {
   return pubsub
     .topic(config.UNFURL_TOPIC)
     .publisher()
@@ -73,12 +48,21 @@ function handleUrlVerification (req, res) {
   return res.send(req.body.challenge);
 }
 
-function callback (req, res) {
+const eventHandlers = {
+  'link_shared': handleLinkShared
+};
+
+const callbackHandlers = {
+  'url_verification': handleUrlVerification,
+  'event_callback': (req, res) => route(req.body.event && req.body.event.type, eventHandlers)(req, res)
+};
+
+exports.callback = (req, res) => {
   return Promise.resolve()
     .then(() => {
-      verifyHttpMethod(req);
-      verifySlackToken(req.body);
-      return routeSlackCallback(req, res);
+      verify(req && req.method, 'POST', 'POST expected', 405);
+      verify(req.body && req.body.token, config.SLACK_TOKEN, 'Invalid credentials', 401);
+      return route(req.body.type, callbackHandlers)(req, res);
     })
     .catch(err => {
       if (!res.headersSent) {
@@ -86,15 +70,4 @@ function callback (req, res) {
       }
       return !err.code ? err : console.error(err);
     });
-}
-
-const callbackHandlers = {
-  'url_verification': handleUrlVerification,
-  'event_callback': handleEventCallback
 };
-
-const eventHandlers = {
-  'link_shared': handleLinkShared
-};
-
-exports.callback = callback;
