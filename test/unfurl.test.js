@@ -43,7 +43,8 @@ function makeUnfurl (url, responsePathV1) {
   const expectedUnfurls = {};
   expectedUnfurls[url] = {
     title: rawV1Response.Attributes.Number.value,
-    text: rawV1Response.Attributes.Name.value
+    text: rawV1Response.Attributes.Name.value,
+    title_link: url
   };
   return expectedUnfurls;
 }

@@ -42,7 +42,8 @@ function v1ObjectToUnfurl (url, obj) {
     const unfurl = {};
     unfurl[url] = {
       title: attr.Number.value,
-      text: attr.Name.value
+      text: attr.Name.value,
+      title_link: url
     };
     return unfurl;
   }
