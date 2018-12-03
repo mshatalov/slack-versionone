@@ -4,6 +4,8 @@ const config = require('./config');
 const tiny = require('tiny-json-http');
 const URL = require('url');
 
+const validTypes = [ 'Story', 'Defect', 'Task' ];
+
 function getV1ObjectFromURL (url) {
   if (!url.startsWith(config.V1_URL_BASE)) {
     throw new Error(`URL ${url} ignored`);
@@ -14,17 +16,14 @@ function getV1ObjectFromURL (url) {
     throw new Error(`Could not extract V1 oidToken, ignoring ${url}`);
   }
 
-  let oidParts = oid.split(':');
-  if (oidParts.length < 2) {
+  const [ type, id ] = oid.split(':');
+  if (id === undefined) {
     throw new Error(`Asset ID is missing, ignoring ${url}`);
-  }
-
-  let type = oidParts[0];
-  if (type !== 'Story' && type !== 'Defect') {
+  } else if (!validTypes.includes(type)) {
     throw new Error('Asset type ' + type + ' ignored (' + url + ')');
   }
 
-  return getV1Object(type, oidParts[1]);
+  return getV1Object(type, id);
 }
 
 async function getV1Object (type, id) {

@@ -100,6 +100,10 @@ test.serial('Unfurl parses V1 response and posts an unfurl to Slack: Defect', as
   testSuccessfulUnfurl(t, 'Defect', 33333, './replies/v1-defect-33333.json')
 );
 
+test.serial('Unfurl parses V1 response and posts an unfurl to Slack: Task', async t =>
+  testSuccessfulUnfurl(t, 'Task', 22222, './replies/v1-task-22222.json')
+);
+
 test.serial('Reports error if V1 returns non-200', async t => {
   const code = 401;
   await t.throwsAsync(
@@ -142,12 +146,12 @@ test.serial('Reports error if V1 object is missing number', async t => {
   await t.throwsAsync(invokeUnfurl(url, 'mock-ts', 'mock-ch'), { instanceOf: Error, message: `Could not extract details for ${url}` });
 });
 
-test.serial('Only Story and Defect asset types supported', async t => {
+test.serial('Reports error for an unsupported asset type', async t => {
   const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidToken=Epic%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: new RegExp('Asset type Epic ignored') });
 });
 
-test.serial('Only Story and Defect asset types supported, case sensitive', async t => {
+test.serial('Asset types are case sensitive', async t => {
   const url = `${config.V1_URL_BASE}/story.mvc/Summary?oidToken=story%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: new RegExp('Asset type story ignored') });
 });
