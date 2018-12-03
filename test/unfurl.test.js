@@ -163,7 +163,7 @@ test.serial('Reports error if oidToken parameter is missing', async t => {
 
 test.serial('Invalid URL base is ignored', async t => {
   const url = `${config.V1_URL_BASE.slice(0, -2)}/story.mvc/Summary?oidToken=Epic%3A11111`;
-  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: /ignored/ });
+  await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: `URL base is unknown, ignoring ${url}` });
 });
 
 test.serial('PubSub message with no data is ignored', t => {

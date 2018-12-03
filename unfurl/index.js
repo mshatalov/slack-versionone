@@ -8,7 +8,7 @@ const validTypes = [ 'Story', 'Defect', 'Task' ];
 
 function getV1ObjectFromURL (url) {
   if (!url.startsWith(config.V1_URL_BASE)) {
-    throw new Error(`URL ${url} ignored`);
+    throw new Error(`URL base is unknown, ignoring ${url}`);
   }
 
   const oid = URL.parse(url, true).query['oidToken'];
