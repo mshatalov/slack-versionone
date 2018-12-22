@@ -38,13 +38,13 @@ async function getV1Object (type, id) {
 function v1ObjectToUnfurl (url, obj) {
   const attr = obj && obj.Attributes;
   if (attr && attr.Number && attr.Name) {
-    const unfurl = {};
-    unfurl[url] = {
-      title: attr.Number.value,
-      text: attr.Name.value,
-      title_link: url
+    return {
+      [url]: {
+        title: attr.Number.value,
+        text: attr.Name.value,
+        title_link: url
+      }
     };
-    return unfurl;
   }
   throw new Error(`Could not extract details for ${url}`);
 }
