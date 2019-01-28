@@ -107,8 +107,13 @@ test('link_shared event generates corresponding PubSub messages', async t => {
     publisher: sinon.stub().returnsThis(),
     publish: sinon.stub().resolves('message-id')
   };
-  const sample = proxyquire('../callback', {
+
+  const sampleGcpQueue = proxyquire('../callback/queue-gcp', {
     '@google-cloud/pubsub': sinon.stub().returns(pubsubMock)
+  });
+
+  const sample = proxyquire('../callback', {
+    './queue-gcp': sampleGcpQueue
   });
 
   await sample.callback(req, res);

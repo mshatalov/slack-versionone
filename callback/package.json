@@ -9,7 +9,8 @@
   "author": "Mikhail Shatalov",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/pubsub": "^0.20.1"
+    "@google-cloud/pubsub": "^0.20.1",
+    "aws-sdk": "^2.395.0"
   },
   "devDependencies": {}
 }

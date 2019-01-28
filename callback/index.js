@@ -1,9 +1,7 @@
 'use strict';
 
 const config = require('./config');
-const PubSub = require('@google-cloud/pubsub');
-
-const pubsub = new PubSub();
+let queue;
 
 function verify (value, expected, errorMessage, errorCode) {
   if (value !== expected) {
@@ -27,20 +25,11 @@ async function handleLinkShared (req, res) {
   const links = event && event.links;
   if (links) {
     console.log('Processing links ' + links.map(link => link.url));
-    await Promise.all(links.map(link => postUnfurlMessage(link.url, event.message_ts, event.channel)));
+    await Promise.all(links.map(link => queue.publish(link.url, event.message_ts, event.channel)));
   } else {
     console.log('No links to process');
   }
   res.status(200).send('OK');
-}
-
-function postUnfurlMessage (link, ts, channel) {
-  return pubsub
-    .topic(config.UNFURL_TOPIC)
-    .publisher()
-    .publish(Buffer.from(link), { ts: ts, channel: channel })
-    .then(id => console.log(`Posted ${id} for ${link} in ${channel} at ${ts}`))
-    .catch(console.error);
 }
 
 function handleUrlVerification (req, res) {
@@ -57,7 +46,7 @@ const callbackHandlers = {
   'event_callback': (req, res) => route(req.body.event && req.body.event.type, eventHandlers)(req, res)
 };
 
-exports.callback = (req, res) => {
+const callback = (req, res) => {
   return Promise.resolve()
     .then(() => {
       verify(req && req.method, 'POST', 'POST expected', 405);
@@ -70,4 +59,33 @@ exports.callback = (req, res) => {
       }
       return !err.code ? err : console.error(err);
     });
+};
+
+exports.callback = (req, res) => {
+  queue = queue || require('./queue-gcp');
+  return callback(req, res);
+};
+
+exports.callback_aws = async (event, context) => {
+  queue = queue || require('./queue-aws');
+
+  const req = { method: event.httpMethod };
+  if (event.body !== undefined && event.body !== null) {
+    req.body = JSON.parse(event.body);
+  }
+
+  const res = {
+    _status: 200,
+    _body: '',
+    headersSent: false,
+    status: function (code) { this._status = code; this.headersSent = true; return this; },
+    send: function (body) { this._body = body; this.headersSent = true; return this; }
+  };
+
+  await callback(req, res);
+
+  return {
+    statusCode: res._status,
+    body: res._body
+  };
 };
