@@ -10,7 +10,7 @@ const config = {
 };
 Object.assign(process.env, config);
 
-const unfurl = require('../unfurl');
+const unfurl = require('../unfurl/unfurl');
 
 function mockV1 (type, id, code, responsePathV1) {
   return nock(config.V1_URL_BASE)
@@ -54,13 +54,7 @@ function makeV1URL (type, id) {
 }
 
 function invokeUnfurl (url, ts, channel, messageId) {
-  return unfurl.unfurl({
-    data: Buffer.from(url).toString('base64'),
-    attributes: {
-      ts: ts,
-      channel: channel
-    }
-  }, { eventId: messageId || 'message-id' });
+  return unfurl.unfurl(messageId || 'message-id', url, ts, channel);
 }
 
 async function testSuccessfulUnfurl (t, type, id, responsePathV1, code) {
@@ -164,10 +158,4 @@ test.serial('Reports error if oidToken parameter is missing', async t => {
 test.serial('Invalid URL base is ignored', async t => {
   const url = `${config.V1_URL_BASE.slice(0, -2)}/story.mvc/Summary?oidToken=Epic%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: `URL base is unknown, ignoring ${url}` });
-});
-
-test.serial('PubSub message with no data is ignored', t => {
-  unfurl.unfurl({}, { eventId: 'message-id-no-data' });
-  t.true(console.error.called);
-  t.is(console.error.args[0][0], 'Message message-id-no-data has no data');
 });
