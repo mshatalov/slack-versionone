@@ -3,5 +3,5 @@ module.exports = {
   'UNFURL_TOPIC': process.env.UNFURL_TOPIC,
 
   'AWS_REGION': process.env.AWS_REGION,
-  'AWS_SQS_QUEUE_NAME': process.env.AWS_SQS_QUEUE_NAME
+  'AWS_SNS_TOPIC_ARN': process.env.AWS_SQS_QUEUE_NAME
 };

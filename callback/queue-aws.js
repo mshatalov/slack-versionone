@@ -3,39 +3,23 @@
 const config = require('./config');
 
 const AWS = require('aws-sdk');
-const sqs = new AWS.SQS({ region: config.AWS_REGION, apiVersion: '2012-11-05' });
-
-let queueUrl;
-
-const getQueueUrl = async () => {
-  if (queueUrl) {
-    try {
-      return (await queueUrl).QueueUrl;
-    } catch (e) {
-      console.error('Could not get SQS queue URL last time, will try again now');
-    }
-  }
-  queueUrl = sqs.getQueueUrl({ QueueName: config.AWS_SQS_QUEUE_NAME }).promise();
-  return (await queueUrl).QueueUrl;
-};
+const sns = new AWS.SNS({ region: config.AWS_REGION, apiVersion: '2010-03-31' });
 
 exports.publish = (link, ts, channel) => {
-  return getQueueUrl()
-    .then(url => ({
-      QueueUrl: url,
-      MessageAttributes: {
-        ts: {
-          DataType: 'String',
-          StringValue: ts
-        },
-        channel: {
-          DataType: 'String',
-          StringValue: channel
-        }
+  return sns.publish({
+    TopicArn: config.AWS_SNS_TOPIC_ARN,
+    MessageAttributes: {
+      ts: {
+        DataType: 'String',
+        StringValue: ts
       },
-      MessageBody: link
-    }))
-    .then(params => sqs.sendMessage(params).promise())
+      channel: {
+        DataType: 'String',
+        StringValue: channel
+      }
+    },
+    Message: link
+  }).promise()
     .then(result => console.log(`Posted ${result.MessageId} for ${link} in ${channel} at ${ts}`))
     .catch(console.error);
 };
