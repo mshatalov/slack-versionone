@@ -3,19 +3,22 @@
 const config = require('./config');
 let queueImpl;
 
+class SlackV1Error extends Error {
+  constructor (message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
 function verify (value, expected, errorMessage, errorCode) {
   if (value !== expected) {
-    const error = new Error(errorMessage);
-    error.code = errorCode;
-    throw error;
+    throw new SlackV1Error(errorMessage, errorCode);
   }
 }
 
 function route (key, handlers) {
   if (!(handlers && key && handlers[key])) {
-    const error = new Error(`"${key}" is not supported`);
-    error.code = 400;
-    throw error;
+    throw new SlackV1Error(`"${key}" is not supported`, 400);
   }
   return handlers[key];
 }
@@ -54,7 +57,7 @@ const callback = (req, res) => {
       return route(req.body.type, callbackHandlers)(req, res);
     })
     .catch(err => {
-      if (!res.headersSent && err.code) {
+      if (!res.headersSent && err instanceof SlackV1Error) {
         console.error(err.message);
         res.status(err.code).send(err);
       } else {

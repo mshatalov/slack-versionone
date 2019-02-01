@@ -10,6 +10,5 @@ exports.publish = (link, ts, channel) => {
     .topic(config.UNFURL_TOPIC)
     .publisher()
     .publish(Buffer.from(link), { ts: ts, channel: channel })
-    .then(id => console.log(`Posted ${id} for ${link} in ${channel} at ${ts}`))
-    .catch(console.error);
+    .then(id => console.log(`Posted ${id} for ${link} in ${channel} at ${ts}`));
 };

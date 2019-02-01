@@ -20,6 +20,5 @@ exports.publish = (link, ts, channel) => {
     },
     Message: link
   }).promise()
-    .then(result => console.log(`Posted ${result.MessageId} for ${link} in ${channel} at ${ts}`))
-    .catch(console.error);
+    .then(result => console.log(`Posted ${result.MessageId} for ${link} in ${channel} at ${ts}`));
 };
