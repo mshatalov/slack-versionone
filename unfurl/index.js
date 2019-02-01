@@ -12,4 +12,16 @@ exports.unfurl = (data, context) => {
   return unfurl(messageId, link, ts, channel);
 };
 
+exports.unfurl_aws = async (event) => {
+  const sns = event.Records[0].Sns;
+  const {
+    Message: link,
+    MessageId: messageId,
+    MessageAttributes: {
+      ts: { Value: ts },
+      channel: { Value: channel }
+    }
+  } = sns;
+
+  return unfurl(messageId, link, ts, channel);
 };
