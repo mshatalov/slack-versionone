@@ -74,7 +74,7 @@ test('AWS handler - Empty links list generates no PubSub messages, but responds 
   t.is(res.statusCode, 200);
 });
 
-test('AWS handler - link_shared event generates corresponding PubSub messages', async t => {
+test.serial('AWS handler - link_shared event generates corresponding PubSub messages', async t => {
   const event = {
     httpMethod: 'POST',
     body: JSON.stringify({
@@ -113,4 +113,64 @@ test('AWS handler - link_shared event generates corresponding PubSub messages', 
 
   t.is(snsMock.publish.callCount, 5);
   t.is(res.statusCode, 200);
+});
+
+test.serial('AWS handler passes through uncaught exceptions', async t => {
+  const event = {
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      token: config.SLACK_TOKEN,
+      type: 'event_callback',
+      event: {
+        type: 'link_shared',
+        message_ts: 'timestamp',
+        channel: 'channel-id',
+        links: [
+          { domain: 'www1.v1host.com', url: 'https://www1.v1host.com/sample/story.mvc/Summary?oidToken=Story%3A55555' }
+        ]
+      }
+    })
+  };
+
+  const sample = proxyquire('../callback', {
+    './queue-aws': {
+      publish: sinon.stub().rejects(new Error('some error'))
+    }
+  });
+
+  await t.throwsAsync(async () => sample.callback_aws(event));
+});
+
+test.serial('AWS handler passes through uncaught SNS exceptions', async t => {
+  const event = {
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      token: config.SLACK_TOKEN,
+      type: 'event_callback',
+      event: {
+        type: 'link_shared',
+        message_ts: 'timestamp',
+        channel: 'channel-id',
+        links: [
+          { domain: 'www1.v1host.com', url: 'https://www1.v1host.com/sample/story.mvc/Summary?oidToken=Story%3A55555' }
+        ]
+      }
+    })
+  };
+
+  const snsMock = {
+    publish: sinon.stub().returns({ promise: sinon.stub().rejects(new Error('SNS test error')) })
+  };
+
+  const sampleAwsQueue = proxyquire('../callback/queue-aws', {
+    'aws-sdk': {
+      SNS: sinon.stub().returns(snsMock)
+    }
+  });
+
+  const sample = proxyquire('../callback', {
+    './queue-aws': sampleAwsQueue
+  });
+
+  await t.throwsAsync(async () => sample.callback_aws(event));
 });
