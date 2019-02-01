@@ -54,10 +54,12 @@ const callback = (req, res) => {
       return route(req.body.type, callbackHandlers)(req, res);
     })
     .catch(err => {
-      if (!res.headersSent) {
-        res.status(err.code || 500).send(err);
+      if (!res.headersSent && err.code) {
+        console.error(err.message);
+        res.status(err.code).send(err);
+      } else {
+        throw err;
       }
-      return !err.code ? err : console.error(err);
     });
 };
 

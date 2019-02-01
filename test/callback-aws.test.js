@@ -30,7 +30,7 @@ test('AWS handler - URL verification responds with correct challenge', async t =
 
   const res = await callback.callback_aws(event);
   t.is(res.statusCode, 200);
-  t.is(res.body, challenge);
+  t.is(res.body, challenge.toString());
 });
 
 test('AWS handler - Require POST', async t => {
@@ -40,6 +40,7 @@ test('AWS handler - Require POST', async t => {
 
   const res = await callback.callback_aws(event);
   t.is(res.statusCode, 405);
+  t.is(typeof res.body, 'string');
 });
 
 test('AWS handler - Slack token is verified on each request', async t => {
