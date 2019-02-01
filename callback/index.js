@@ -27,6 +27,8 @@ exports.callback_aws = async (event, context) => {
 
   return {
     statusCode: res._status,
-    body: res._body
+    body: (res._body !== null && res._body !== undefined)
+      ? (typeof res._body === 'object' ? JSON.stringify(res._body) : res._body + '')
+      : ''
   };
 };
