@@ -6,7 +6,7 @@ const config = {
   SLACK_TOKEN: 'test-slack-tocken',
   UNFURL_TOPIC: 'test-unfurl-token',
   AWS_REGION: 'test-region',
-  AWS_SQS_QUEUE_NAME: 'test-sqs-queue-name'
+  AWS_SNS_TOPIC_ARN: 'test-sns-topic-arn'
 };
 Object.assign(process.env, config);
 
@@ -94,14 +94,13 @@ test('AWS handler - link_shared event generates corresponding PubSub messages', 
     })
   };
 
-  const sqsMock = {
-    getQueueUrl: sinon.stub().returns({ promise: sinon.stub().resolves({ QueueUrl: 'test-queue-url' }) }),
-    sendMessage: sinon.stub().returns({ promise: sinon.stub().resolves({ MessageId: 'message-id' }) })
+  const snsMock = {
+    publish: sinon.stub().returns({ promise: sinon.stub().resolves({ MessageId: 'message-id' }) })
   };
 
   const sampleAwsQueue = proxyquire('../callback/queue-aws', {
     'aws-sdk': {
-      SQS: sinon.stub().returns(sqsMock)
+      SNS: sinon.stub().returns(snsMock)
     }
   });
 
@@ -111,8 +110,6 @@ test('AWS handler - link_shared event generates corresponding PubSub messages', 
 
   const res = await sample.callback_aws(event);
 
-  sinon.assert.calledOnce(sqsMock.getQueueUrl);
-  sinon.assert.calledWithMatch(sqsMock.getQueueUrl, { QueueName: config.AWS_SQS_QUEUE_NAME });
-  t.is(sqsMock.sendMessage.callCount, 5);
+  t.is(snsMock.publish.callCount, 5);
   t.is(res.statusCode, 200);
 });
