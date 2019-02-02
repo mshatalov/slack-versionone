@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: slack-versionone AWS deployment
+
+Globals:
+  Function:
+    Timeout: 5
+
+Resources:
+  CallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: callback/
+      Handler: index.callback_aws
+      Runtime: nodejs8.10
+      Environment:
+        Variables:
+          SLACK_TOKEN: your-slack-verification-token
+          AWS_SNS_TOPIC_ARN: !Ref UnfurlTopic
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref UnfurlTopic
+      Events:
+        SlackCallback:
+          Type: Api
+          Properties:
+            Path: /callback
+            Method: post
+
+  UnfurlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: unfurl/
+      Handler: index.unfurl_aws
+      Runtime: nodejs8.10
+      Environment:
+        Variables:
+          SLACK_OAUTH_TOKEN: your-slack-oauth-token
+          V1_USER: your-v1-username
+          V1_PASSWORD: your-v1-password
+          V1_URL_BASE: your-v1-base-url
+      Events:
+        UnfurlMessage:
+          Type: SNS
+          Properties:
+            Topic: !Ref UnfurlTopic
+
+  UnfurlTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: lambda
+          Endpoint: !GetAtt UnfurlFunction.Arn
+
+Outputs:
+  CallbackURL:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/callback"
