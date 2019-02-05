@@ -37,6 +37,7 @@ Resources:
       CodeUri: unfurl/
       Handler: index.unfurl_aws
       Runtime: nodejs8.10
+      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           SLACK_OAUTH_TOKEN: your-slack-oauth-token
