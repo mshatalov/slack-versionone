@@ -10,7 +10,7 @@ const config = {
 };
 Object.assign(process.env, config);
 
-const unfurl = require('../unfurl/unfurl');
+const unfurl = require('../../unfurl/unfurl');
 
 function mockV1 (type, id, code, responsePathV1) {
   return nock(config.V1_URL_BASE)

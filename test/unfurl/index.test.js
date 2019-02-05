@@ -12,7 +12,7 @@ function invokeUnfurl (func, url, ts, channel, messageId) {
   }, { eventId: messageId || 'message-id' });
 }
 
-const unfurl = require('../unfurl');
+const unfurl = require('../../unfurl');
 
 test.beforeEach(t => {
   sinon.stub(console, 'log');
@@ -32,7 +32,7 @@ test.serial('PubSub message with no data is ignored', t => {
 
 test.serial('PubSub messages are parsed correctly', async (t) => {
   const unfurlStub = sinon.stub().resolves();
-  const sample = proxyquire('../unfurl', {
+  const sample = proxyquire('../../unfurl', {
     './unfurl': {
       unfurl: unfurlStub
     }
