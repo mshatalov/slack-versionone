@@ -159,3 +159,9 @@ test.serial('Invalid URL base is ignored', async t => {
   const url = `${config.V1_URL_BASE.slice(0, -2)}/story.mvc/Summary?oidToken=Epic%3A11111`;
   await t.throwsAsync(invokeUnfurl(url, 'ts', 'ch'), { instanceOf: Error, message: `URL base is unknown, ignoring ${url}` });
 });
+
+test.serial('Message with no data is ignored', async t => {
+  await invokeUnfurl(undefined, undefined, undefined, 'message-id-no-data');
+  t.true(console.error.called);
+  t.is(console.error.args[0][0], 'Message message-id-no-data has no data');
+});

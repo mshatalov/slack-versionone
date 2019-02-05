@@ -65,6 +65,10 @@ function postSlackUnfurlMessage (message) {
 }
 
 exports.unfurl = (messageId, link, ts, channel) => {
+  if (!link) {
+    return console.error(`Message ${messageId} has no data`);
+  }
+
   console.log(`Processing ${messageId} for ${link} in ${channel} at ${ts}`);
   return Promise.resolve()
     .then(() => getV1ObjectFromURL(link))
