@@ -25,7 +25,8 @@ test.serial('AWS queue generates corresponding SNS messages', async t => {
 
   const sampleAwsQueue = proxyquire('../../callback/queue-aws', {
     'aws-sdk': {
-      SNS: snsConsructorMock
+      SNS: snsConsructorMock,
+      '@noCallThru': true
     }
   });
 
@@ -60,7 +61,8 @@ test.serial('AWS queue passes through uncaught SNS exceptions', async t => {
 
   const sampleAwsQueue = proxyquire('../../callback/queue-aws', {
     'aws-sdk': {
-      SNS: sinon.stub().returns(snsMock)
+      SNS: sinon.stub().returns(snsMock),
+      '@noCallThru': true
     }
   });
 
