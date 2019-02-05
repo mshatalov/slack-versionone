@@ -3,12 +3,8 @@ const { unfurl } = require('./unfurl');
 exports.unfurl = (data, context) => {
   const messageId = context.eventId;
   const link = (data.data && Buffer.from(data.data, 'base64').toString());
-  if (!link) {
-    console.error(`Message ${messageId} has no data`);
-    return;
-  }
 
-  const { ts, channel } = data.attributes;
+  const { ts, channel } = data.attributes || {};
   return unfurl(messageId, link, ts, channel);
 };
 
@@ -17,11 +13,10 @@ exports.unfurl_aws = async (event) => {
   const {
     Message: link,
     MessageId: messageId,
-    MessageAttributes: {
-      ts: { Value: ts },
-      channel: { Value: channel }
-    }
+    MessageAttributes: attrs
   } = sns;
+  const ts = attrs && attrs.ts && attrs.ts.Value;
+  const channel = attrs && attrs.channel && attrs.channel.Value;
 
   return unfurl(messageId, link, ts, channel);
 };
