@@ -21,18 +21,18 @@ test.serial('AWS queue generates corresponding SNS messages', async t => {
   const snsMock = {
     publish: sinon.stub().returns({ promise: sinon.stub().resolves({ MessageId: 'message-id' }) })
   };
-  const snsConsructorMock = sinon.stub().returns(snsMock);
+  const snsConstructorMock = sinon.stub().returns(snsMock);
 
   const sampleAwsQueue = proxyquire('../../callback/queue-aws', {
     'aws-sdk': {
-      SNS: snsConsructorMock,
+      SNS: snsConstructorMock,
       '@noCallThru': true
     }
   });
 
   await sampleAwsQueue.publish(link, ts, channel);
 
-  sinon.assert.calledWithExactly(snsConsructorMock, { region: config.AWS_REGION, apiVersion: '2010-03-31' });
+  sinon.assert.calledWithExactly(snsConstructorMock, { region: config.AWS_REGION, apiVersion: '2010-03-31' });
   sinon.assert.calledWithExactly(snsMock.publish, {
     TopicArn: config.AWS_SNS_TOPIC_ARN,
     MessageAttributes: {
