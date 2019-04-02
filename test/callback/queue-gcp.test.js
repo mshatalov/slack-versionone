@@ -19,12 +19,11 @@ test('GCP queue generates corresponding PubSub messages', async t => {
 
   const pubsubMock = {
     topic: sinon.stub().returnsThis(),
-    publisher: sinon.stub().returnsThis(),
     publish: sinon.stub().resolves('message-id')
   };
 
   const sampleGcpQueue = proxyquire('../../callback/queue-gcp', {
-    '@google-cloud/pubsub': sinon.stub().returns(pubsubMock)
+    '@google-cloud/pubsub': { PubSub: sinon.stub().returns(pubsubMock) }
   });
 
   await sampleGcpQueue.publish(link, ts, channel);
@@ -41,12 +40,11 @@ test.serial('GCP queue passes through uncaught PubSub exceptions', async t => {
 
   const pubsubMock = {
     topic: sinon.stub().returnsThis(),
-    publisher: sinon.stub().returnsThis(),
     publish: sinon.stub().rejects(new Error('Unexpected test PubSub error'))
   };
 
   const sampleGcpQueue = proxyquire('../../callback/queue-gcp', {
-    '@google-cloud/pubsub': sinon.stub().returns(pubsubMock)
+    '@google-cloud/pubsub': { PubSub: sinon.stub().returns(pubsubMock) }
   });
 
   await t.throwsAsync(async () => sampleGcpQueue.publish(link, ts, channel));
