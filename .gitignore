@@ -1,5 +1,6 @@
 # Local configuration
 env.*.yaml
+aws-sam.yaml
 
 # Logs
 logs
@@ -80,3 +81,4 @@ typings/
 
 # AWS SAM
 .aws-sam
+packaged.yaml
