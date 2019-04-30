@@ -1,6 +1,8 @@
 # slack-v1
 
 ## Overview
+*Please note that I don't have access to VersionOne anymore and thus will not be updating the integration. Feel free to fork it if anything changes on VersionOne or Slack side in the future.*
+
 Basic [Slack](https://www.slack.com) and [VersionOne](https://www.collab.net/products/versionone) integration that supports links [unfurling](https://api.slack.com/docs/message-link-unfurling) for Stories and Defects.
 
 ### Requirements
@@ -10,7 +12,7 @@ The GCP deployment utilizes [Google Cloud Functions](https://cloud.google.com/fu
 
 The AWS deployment utilizes [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/) and [Amazon Simple Notification Service](https://aws.amazon.com/sns/).
 
-VersionOne version 18.3.2.31 was used to test the integration.
+VersionOne versions 18.3.2.31 and 19.0.5.18 were used to test the integration.
 
 The code is simple enough to be adapted as an [Express](http://expressjs.com/) application and deployed as such within your environment.
 
